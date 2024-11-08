@@ -1,0 +1,997 @@
+openapi: 3.0.0
+info:
+  title: Post Management API
+  version: 1.0.0
+  description: API for managing posts and comments on a platform.
+paths:
+  /post/{id}:
+    get:
+      summary: Get a post by ID
+      description: Retrieves a post along with its author, subreddit, comments, and votes.
+      parameters:
+        - name: id
+          in: path
+          description: ID of the post to retrieve
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Post retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostWithDetails'
+        '404':
+          description: Post not found
+        '500':
+          description: Internal server error
+
+    delete:
+      summary: Delete a post by ID
+      description: Deletes a specific post by ID.
+      parameters:
+        - name: id
+          in: path
+          description: ID of the post to delete
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Post deleted successfully
+        '404':
+          description: Post not found
+        '500':
+          description: Internal server error
+
+    put:
+      summary: Update a post by ID
+      description: Updates the title and content of a post.
+      parameters:
+        - name: id
+          in: path
+          description: ID of the post to update
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                content:
+                  type: string
+              required:
+                - title
+                - content
+      responses:
+        '200':
+          description: Post updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '400':
+          description: Bad request - Missing title or content
+        '404':
+          description: Post not found
+        '500':
+          description: Internal server error
+
+  /post/{postId}/comments:
+    post:
+      summary: Get all comments for a post
+      description: Retrieves all comments for a specific post.
+      parameters:
+        - name: postId
+          in: path
+          description: ID of the post to get comments for
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Comments retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comment'
+        '404':
+          description: No comments found or post not found
+        '500':
+          description: Internal server error
+
+components:
+  schemas:
+    Post:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+        authorId:
+          type: string
+        subredditId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    PostWithDetails:
+      allOf:
+        - $ref: '#/components/schemas/Post'
+      properties:
+        author:
+          type: object
+          properties:
+            id:
+              type: string
+            username:
+              type: string
+        subreddit:
+          type: object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Comment'
+        votes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Vote'
+
+    Comment:
+      type: object
+      properties:
+        id:
+          type: string
+        text:
+          type: string
+        postId:
+          type: string
+        authorId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    Vote:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        postId:
+          type: string
+        voteType:
+          type: string
+          enum: ['upvote', 'downvote']
+
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+
+
+openapi: 3.0.0
+info:
+  title: Comment Management API
+  version: 1.0.0
+  description: API for managing comments, including retrieving, updating, and deleting individual comments by ID.
+paths:
+  /comments/{id}:
+    get:
+      summary: Get a comment by ID
+      description: Retrieve a single comment based on its unique ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the comment to retrieve
+      responses:
+        '200':
+          description: Comment retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '404':
+          description: Comment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      summary: Update a comment by ID
+      description: Update the text of an existing comment.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the comment to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+                  description: New text for the comment
+              required:
+                - text
+      responses:
+        '200':
+          description: Comment updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '400':
+          description: Comment text is required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Comment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      summary: Delete a comment by ID
+      description: Remove a comment based on its unique ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the comment to delete
+      responses:
+        '200':
+          description: Comment deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Comment deleted successfully.
+        '404':
+          description: Comment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    Comment:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the comment
+        text:
+          type: string
+          description: Text content of the comment
+        createdAt:
+          type: string
+          format: date-time
+          description: Date and time when the comment was created
+        updatedAt:
+          type: string
+          format: date-time
+          description: Date and time when the comment was last updated
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error message
+
+openapi: 3.0.0
+info:
+  title: Comment Management API
+  version: 1.0.0
+  description: API for creating and retrieving comments on posts.
+paths:
+  /comments:
+    post:
+      summary: Create a new comment
+      description: Create a new comment on a post. Requires user authentication.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommentRequest'
+      responses:
+        '201':
+          description: Comment created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized, user not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      summary: Retrieve all comments
+      description: Retrieve a list of all comments, including author details.
+      responses:
+        '200':
+          description: A list of comments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comment'
+        '404':
+          description: No comments found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    CreateCommentRequest:
+      type: object
+      properties:
+        postId:
+          type: string
+          description: ID of the post to which the comment is associated
+        text:
+          type: string
+          description: Text content of the comment
+        replyToId:
+          type: string
+          description: ID of the parent comment if this is a reply
+      required:
+        - postId
+        - text
+    Comment:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the comment
+        postId:
+          type: string
+          description: ID of the post to which the comment belongs
+        text:
+          type: string
+          description: Text content of the comment
+        authorId:
+          type: string
+          description: ID of the author who created the comment
+        replyToId:
+          type: string
+          nullable: true
+          description: ID of the comment this is replying to (if any)
+        author:
+          type: object
+          description: Information about the author
+          properties:
+            id:
+              type: string
+              description: Unique identifier for the author
+            name:
+              type: string
+              description: Name of the author
+        createdAt:
+          type: string
+          format: date-time
+          description: Date and time the comment was created
+        updatedAt:
+          type: string
+          format: date-time
+          description: Date and time the comment was last updated
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error message
+
+openapi: 3.0.0
+info:
+  title: Post Management API
+  version: 1.0.0
+  description: API for creating and retrieving posts within subreddits.
+paths:
+  /posts:
+    post:
+      summary: Create a new post
+      description: Create a new post within a specific subreddit. Requires user authentication and subscription to the subreddit.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePostRequest'
+      responses:
+        '201':
+          description: Post created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized, user not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden, user must subscribe to the subreddit to post
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      summary: Retrieve all posts
+      description: Retrieve a list of all posts, including comments.
+      responses:
+        '200':
+          description: A list of posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PostWithComments'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    CreatePostRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Title of the post
+        content:
+          type: string
+          description: Content body of the post
+        subredditId:
+          type: string
+          description: ID of the subreddit where the post is created
+      required:
+        - title
+        - content
+        - subredditId
+    Post:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the post
+        title:
+          type: string
+          description: Title of the post
+        content:
+          type: string
+          description: Content body of the post
+        authorId:
+          type: string
+          description: ID of the author who created the post
+        subredditId:
+          type: string
+          description: ID of the subreddit associated with the post
+        createdAt:
+          type: string
+          format: date-time
+          description: Date and time the post was created
+        updatedAt:
+          type: string
+          format: date-time
+          description: Date and time the post was last updated
+    PostWithComments:
+      allOf:
+        - $ref: '#/components/schemas/Post'
+        - type: object
+          properties:
+            comments:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: Unique identifier for the comment
+                  text:
+                    type: string
+                    description: Text of the comment
+                  authorId:
+                    type: string
+                    description: ID of the author who created the comment
+                  createdAt:
+                    type: string
+                    format: date-time
+                    description: Date and time the comment was created
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error message
+
+
+openapi: 3.0.0
+info:
+  title: Post Management API
+  version: 1.0.0
+  description: API for creating and retrieving posts within subreddits.
+paths:
+  /posts:
+    post:
+      summary: Create a new post
+      description: Create a new post within a specific subreddit. Requires user authentication and subscription to the subreddit.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePostRequest'
+      responses:
+        '201':
+          description: Post created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized, user not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden, user must subscribe to the subreddit to post
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      summary: Retrieve all posts
+      description: Retrieve a list of all posts, including comments.
+      responses:
+        '200':
+          description: A list of posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PostWithComments'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    CreatePostRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Title of the post
+        content:
+          type: string
+          description: Content body of the post
+        subredditId:
+          type: string
+          description: ID of the subreddit where the post is created
+      required:
+        - title
+        - content
+        - subredditId
+    Post:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the post
+        title:
+          type: string
+          description: Title of the post
+        content:
+          type: string
+          description: Content body of the post
+        authorId:
+          type: string
+          description: ID of the author who created the post
+        subredditId:
+          type: string
+          description: ID of the subreddit associated with the post
+        createdAt:
+          type: string
+          format: date-time
+          description: Date and time the post was created
+        updatedAt:
+          type: string
+          format: date-time
+          description: Date and time the post was last updated
+    PostWithComments:
+      allOf:
+        - $ref: '#/components/schemas/Post'
+        - type: object
+          properties:
+            comments:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: Unique identifier for the comment
+                  text:
+                    type: string
+                    description: Text of the comment
+                  authorId:
+                    type: string
+                    description: ID of the author who created the comment
+                  createdAt:
+                    type: string
+                    format: date-time
+                    description: Date and time the comment was created
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error message
+
+openapi: 3.0.0
+info:
+  title: Subreddit Subscription API
+  version: 1.0.0
+  description: API endpoint for subscribing to a subreddit.
+paths:
+  /subreddit/subscribe:
+    post:
+      summary: Subscribe to a subreddit
+      description: Subscribes an authenticated user to a subreddit. Ensures that the user has not already subscribed to the subreddit.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubredditSubscriptionRequest'
+      responses:
+        '200':
+          description: Subscription successful
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "Subreddit subscription ID"
+        '400':
+          description: Bad Request - Validation error or user already subscribed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized - User must be authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    SubredditSubscriptionRequest:
+      type: object
+      properties:
+        subredditId:
+          type: string
+          description: ID of the subreddit the user wants to subscribe to
+      required:
+        - subredditId
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error message
+      example:
+        message: "You've already subscribed to this subreddit"
+openapi: 3.0.0
+info:
+  title: Subreddit Unsubscription API
+  version: 1.0.0
+  description: API endpoint for unsubscribing from a subreddit.
+paths:
+  /subreddit/unsubscribe:
+    post:
+      summary: Unsubscribe from a subreddit
+      description: Unsubscribes an authenticated user from a subreddit, ensuring they are already subscribed before unsubscribing.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubredditSubscriptionRequest'
+      responses:
+        '200':
+          description: Unsubscription successful
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "Subreddit unsubscription ID"
+        '400':
+          description: Bad Request - Validation error or user not subscribed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized - User must be authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    SubredditSubscriptionRequest:
+      type: object
+      properties:
+        subredditId:
+          type: string
+          description: ID of the subreddit the user wants to unsubscribe from
+      required:
+        - subredditId
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error message
+      example:
+        message: "You've not been subscribed to this subreddit, yet."
+
+openapi: 3.0.0
+info:
+  title: Subreddit API
+  version: 1.0.0
+  description: API for creating a new subreddit and fetching all subreddits.
+paths:
+  /subreddit:
+    post:
+      summary: Create a new subreddit
+      description: Creates a new subreddit if it doesn't already exist and subscribes the creator to it.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSubredditRequest'
+      responses:
+        '201':
+          description: Subreddit created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subreddit'
+        '401':
+          description: Unauthorized - User must be authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflict - Subreddit already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Unprocessable Entity - Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    get:
+      summary: Fetch all subreddits
+      description: Retrieves a list of all subreddits, including associated posts, creators, and subscribers.
+      responses:
+        '200':
+          description: List of subreddits fetched successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SubredditWithDetails'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    CreateSubredditRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the new subreddit
+      required:
+        - name
+
+    Subreddit:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the subreddit
+        name:
+          type: string
+          description: Name of the subreddit
+        creatorId:
+          type: string
+          description: ID of the user who created the subreddit
+
+    SubredditWithDetails:
+      allOf:
+        - $ref: '#/components/schemas/Subreddit'
+      properties:
+        posts:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: Unique identifier of the post
+              title:
+                type: string
+                description: Title of the post
+        Creator:
+          type: object
+          properties:
+            id:
+              type: string
+              description: ID of the creator user
+            username:
+              type: string
+              description: Username of the creator
+        subscribers:
+          type: array
+          items:
+            type: object
+            properties:
+              userId:
+                type: string
+                description: ID of the subscribed user
+
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error message
+      example:
+        message: "Subreddit already exists"
+
+
+

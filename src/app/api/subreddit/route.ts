@@ -1,6 +1,7 @@
 // import { getAuthSession } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { SubredditValidator } from "@/lib/validators/subreddit";
+import { NextResponse } from "next/server";
 import { z } from "zod";
 
 export async function POST(req: Request) {
@@ -42,12 +43,34 @@ export async function POST(req: Request) {
       },
     });
 
-    return new Response(subreddit.name);
+    return NextResponse.json(subreddit, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return new Response(error.message, { status: 422 });
     }
 
     return new Response("Could not create subreddit", { status: 500 });
+  }
+}
+
+// GET method for fetching all subreddits
+export async function GET() {
+  try {
+    const subreddits = await db.subreddit.findMany({
+      include: {
+        posts: true,
+        Creator: true,
+        subscribers: true,
+      },
+    });
+
+    return NextResponse.json(subreddits);
+  } catch (error) {
+    console.error("Error fetching subreddits:", error);
+
+    return NextResponse.json(
+      { error: "Failed to fetch subreddits" },
+      { status: 500 }
+    );
   }
 }
