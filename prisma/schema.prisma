@@ -53,6 +53,7 @@ model User {
   createdSubreddits Subreddit[]    @relation("CreatedBy")
   subscriptions     Subscription[]
   votes             Vote[]
+  role              String         @default("user")
 
   username String? @unique
 
