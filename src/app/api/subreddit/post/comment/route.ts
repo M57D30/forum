@@ -1,4 +1,4 @@
-// import { getAuthSession } from '@/lib/auth'
+import { getAuthSession } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { CommentValidator } from "@/lib/validators/comment";
 import { NextResponse } from "next/server";
@@ -6,16 +6,17 @@ import { z } from "zod";
 
 // Todo: AUTH truksta
 
-export async function POST(req: Request) {
+export async function PATCH(req: Request) {
   try {
     const body = await req.json();
     const { postId, text, replyToId } = CommentValidator.parse(body);
+    console.log("zaza");
 
     // Authenticate the user (assuming user authentication is added later)
-    // const session = await getAuthSession()
-    // if (!session?.user) {
-    //     return new Response('Unauthorized', { status: 401 });
-    // }
+    const session = await getAuthSession();
+    if (!session?.user) {
+      return new Response("Unauthorized", { status: 401 });
+    }
 
     // Create a new comment in the database
     const comment = await db.comment.create({

@@ -1,4 +1,4 @@
-// import { getAuthSession } from "@/lib/auth";
+import { getAuthSession } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { SubredditValidator } from "@/lib/validators/subreddit";
 import { NextResponse } from "next/server";
@@ -6,11 +6,10 @@ import { z } from "zod";
 
 export async function POST(req: Request) {
   try {
-    // const session = await getAuthSession();
-    // Todo: sesija
-    // if (!session?.user) {
-    //   return new Response("Unauthorized", { status: 401 });
-    // }
+    const session = await getAuthSession();
+    if (!session?.user) {
+      return new Response("Unauthorized", { status: 401 });
+    }
 
     const body = await req.json();
     const { name } = SubredditValidator.parse(body);
@@ -29,16 +28,14 @@ export async function POST(req: Request) {
     const subreddit = await db.subreddit.create({
       data: {
         name,
-        // todo: hardcode
-        creatorId: "1",
+        creatorId: session.user.id,
       },
     });
 
     // creator also has to be subscribed
     await db.subscription.create({
       data: {
-        // todo: hardcode
-        userId: "1",
+        userId: session.user.id,
         subredditId: subreddit.id,
       },
     });
