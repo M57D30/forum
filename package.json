@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "clean": "rmdir /s /q node_modules"
+    "clean": "rmdir /s /q node_modules",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@editorjs/code": "^2.9.3",
