@@ -2,11 +2,7 @@
 import { db } from "@/lib/db";
 // import { z } from "zod";
 
-export async function GET(req: Request) {
-  const url = new URL(req.url);
-
-  console.log(url);
-
+export async function GET() {
   try {
     const posts = await db.post.findMany({
       orderBy: {
