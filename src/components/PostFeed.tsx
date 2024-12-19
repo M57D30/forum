@@ -7,7 +7,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { Loader2 } from "lucide-react";
 import { FC, useEffect, useRef } from "react";
-import Post from "./Post";
+import Postas from "./Post";
 import { useSession } from "next-auth/react";
 
 interface PostFeedProps {
@@ -67,7 +67,7 @@ const PostFeed: FC<PostFeedProps> = ({ initialPosts, subredditName }) => {
           // Add a ref to the last post in the list
           return (
             <li key={post.id} ref={ref}>
-              <Post
+              <Postas
                 post={post}
                 commentAmt={post.comments.length}
                 subredditName={post.subreddit.name}
@@ -78,7 +78,7 @@ const PostFeed: FC<PostFeedProps> = ({ initialPosts, subredditName }) => {
           );
         } else {
           return (
-            <Post
+            <Postas
               key={post.id}
               post={post}
               commentAmt={post.comments.length}

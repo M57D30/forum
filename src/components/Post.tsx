@@ -1,8 +1,7 @@
 "use client";
 
 import { formatTimeToNow } from "@/lib/utils";
-import { Post, User, Vote } from "@prisma/client";
-// Todo kazka cia pisa
+import { Post as Postas, User, Vote } from "@prisma/client";
 import { MessageSquare } from "lucide-react";
 import Link from "next/link";
 import { FC, useRef } from "react";
@@ -12,7 +11,7 @@ import PostVoteClient from "./post-vote/PostVoteClient";
 type PartialVote = Pick<Vote, "type">;
 
 interface PostProps {
-  post: Post & {
+  post: Postas & {
     author: User;
     votes: Vote[];
   };
