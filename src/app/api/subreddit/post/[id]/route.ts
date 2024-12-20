@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { getAuthSession } from "@/lib/auth";
 
 // POsto getas
 export async function GET(
@@ -43,6 +44,10 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    const session = await getAuthSession();
+    if (!session?.user) {
+      return new Response("Unauthorized", { status: 401 });
+    }
     // Extract the post ID from the URL parameters
     const { id } = params;
 
@@ -78,6 +83,10 @@ export async function POST(
   { params }: { params: { postId: string } }
 ) {
   try {
+    const session = await getAuthSession();
+    if (!session?.user) {
+      return new Response("Unauthorized", { status: 401 });
+    }
     // Extract the post ID from the URL parameters
     const { postId } = params;
 
@@ -118,6 +127,10 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
+    const session = await getAuthSession();
+    if (!session?.user) {
+      return new Response("Unauthorized", { status: 401 });
+    }
     // Extract the post ID from the URL parameters
     const { id } = params;
 

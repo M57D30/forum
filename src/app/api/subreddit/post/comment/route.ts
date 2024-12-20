@@ -10,7 +10,6 @@ export async function PATCH(req: Request) {
   try {
     const body = await req.json();
     const { postId, text, replyToId } = CommentValidator.parse(body);
-    console.log("zaza");
 
     // Authenticate the user (assuming user authentication is added later)
     const session = await getAuthSession();

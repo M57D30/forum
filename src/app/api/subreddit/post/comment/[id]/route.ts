@@ -1,3 +1,4 @@
+import { getAuthSession } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
 
@@ -53,6 +54,10 @@ export async function DELETE(
   req: Request,
   { params }: { params: { id: string } }
 ) {
+  const session = await getAuthSession();
+  if (!session?.user) {
+    return new Response("Unauthorized", { status: 401 });
+  }
   try {
     // Extract the comment ID from the URL parameters
     const { id } = params;
