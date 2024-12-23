@@ -1,10 +1,16 @@
-// import { getAuthSession } from '@/lib/auth'
 import { db } from "@/lib/db";
-// import { z } from "zod";
 
-export async function GET() {
+export async function GET(
+  request: Request,
+  { params }: { params: { subredditId: string } }
+) {
+  const { subredditId } = params;
+
   try {
     const posts = await db.post.findMany({
+      where: {
+        subredditId: subredditId,
+      },
       orderBy: {
         createdAt: "desc",
       },
@@ -15,10 +21,11 @@ export async function GET() {
         comments: true,
       },
     });
+
     console.log(posts);
     return new Response(JSON.stringify(posts));
   } catch (error) {
     console.log(error);
-    return new Response("Could not fetch posts", { status: 500 });
+    return new Response("Could not fetch posts for subreddit", { status: 500 });
   }
 }

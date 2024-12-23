@@ -17,7 +17,7 @@ export async function POST(req: Request) {
     const subscriptionExists = await db.subscription.findFirst({
       where: {
         subredditId,
-        userId: "1",
+        userId: session.user.id,
       },
     });
 
@@ -31,11 +31,12 @@ export async function POST(req: Request) {
     await db.subscription.create({
       data: {
         subredditId,
-        userId: "1",
+        userId: session.user.id,
       },
     });
     return new Response(subredditId);
   } catch (error) {
+    console.log(error);
     if (error instanceof z.ZodError) {
       return new Response(error.message, { status: 400 });
     }

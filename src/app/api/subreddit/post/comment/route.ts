@@ -22,7 +22,7 @@ export async function PATCH(req: Request) {
       data: {
         text,
         postId,
-        authorId: "1", // Replace with actual authorId from session if available
+        authorId: session?.user.id, // Replace with actual authorId from session if available
         replyToId,
       },
     });

@@ -5,7 +5,6 @@ import { z } from "zod";
 
 export async function POST(req: Request) {
   try {
-    //Todo: Reik autho
     const session = await getAuthSession();
 
     if (!session?.user) {
@@ -19,7 +18,7 @@ export async function POST(req: Request) {
     const subscriptionExists = await db.subscription.findFirst({
       where: {
         subredditId,
-        userId: "1",
+        userId: session.user.id,
       },
     });
 
@@ -37,7 +36,7 @@ export async function POST(req: Request) {
       where: {
         userId_subredditId: {
           subredditId,
-          userId: "1",
+          userId: session.user.id,
         },
       },
     });

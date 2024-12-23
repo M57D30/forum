@@ -6,7 +6,7 @@ import { CommentRequest } from "@/lib/validators/comment";
 import { Comment, CommentVote, User } from "@prisma/client";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { FC, useRef, useState } from "react";
 import CommentVotes from "../CommentVotes";
@@ -43,7 +43,20 @@ const PostComment: FC<PostCommentProps> = ({
   useOnClickOutside(commentRef, () => {
     setIsReplying(false);
   });
-
+  const handleDelete = async () => {
+    try {
+      const request = `/api/subreddit/post/comment/${comment.id}`;
+      await axios.delete(request);
+      router.refresh();
+    } catch (error) {
+      console.log(error);
+      return toast({
+        title: "Something went wrong.",
+        description: "Comment wasn't created successfully. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
   const { mutate: postComment, isLoading } = useMutation({
     mutationFn: async ({ postId, text, replyToId }: CommentRequest) => {
       const payload: CommentRequest = { postId, text, replyToId };
@@ -108,6 +121,16 @@ const PostComment: FC<PostCommentProps> = ({
         >
           <MessageSquare className="h-4 w-4 mr-1.5" />
           Reply
+        </Button>
+        <Button
+          onClick={() => {
+            if (!session) return router.push("/sign-in");
+            handleDelete();
+          }}
+          variant="ghost"
+          size="xs"
+        >
+          <Trash2 className="h-4 w-4 mr-1.5" /> Delete
         </Button>
       </div>
 

@@ -6,7 +6,6 @@ import { z } from "zod";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-
     const { title, content, subredditId } = PostValidator.parse(body);
 
     const session = await getAuthSession();
@@ -38,6 +37,7 @@ export async function POST(req: Request) {
 
     return new Response("OK");
   } catch (error) {
+    console.log(error);
     if (error instanceof z.ZodError) {
       return new Response(error.message, { status: 400 });
     }

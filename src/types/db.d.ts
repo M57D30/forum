@@ -6,3 +6,12 @@ export type ExtendedPost = Post & {
   author: User;
   comments: Comment[];
 };
+
+export type ExtendedSub = {
+  id: string;
+  name: string;
+  Creator: {
+    image: string;
+    username: string;
+  };
+};

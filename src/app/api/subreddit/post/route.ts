@@ -1,27 +1,25 @@
 // import { getAuthSession } from '@/lib/auth'
+import { getAuthSession } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { PostValidator } from "@/lib/validators/post";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-// Todo: Reik sesijos
-
-// Posto create
 export async function POST(req: Request) {
   try {
     const body = await req.json();
 
     const { title, content, subredditId } = PostValidator.parse(body);
-    // const session = await getAuthSession()
+    const session = await getAuthSession();
 
-    // if (!session?.user) {
-    //   return new Response('Unauthorized', { status: 401 })
-    // }
+    if (!session?.user) {
+      return new Response("Unauthorized", { status: 401 });
+    }
 
     const subscription = await db.subscription.findFirst({
       where: {
         subredditId,
-        userId: "1",
+        userId: session.user.id,
       },
     });
 
@@ -33,7 +31,7 @@ export async function POST(req: Request) {
       data: {
         title,
         content,
-        authorId: "1",
+        authorId: session.user.id,
         subredditId,
       },
     });

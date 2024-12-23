@@ -1,7 +1,10 @@
 import CustomFeed from "@/components/homepage/CustomFeed";
 import GeneralFeed from "@/components/homepage/GeneralFeed";
+import SubFeed from "@/components/SubFeed";
 import { buttonVariants } from "@/components/ui/Button";
 import { getAuthSession } from "@/lib/auth";
+import { db } from "@/lib/db";
+import { ExtendedSub } from "@/types/db";
 import { Home as HomeIcon } from "lucide-react";
 import Link from "next/link";
 
@@ -10,6 +13,19 @@ export const fetchCache = "force-no-store";
 
 export default async function Home() {
   const session = await getAuthSession();
+
+  const subs = (await db.subreddit.findMany({
+    select: {
+      name: true,
+      id: true,
+      Creator: {
+        select: {
+          image: true,
+          username: true,
+        },
+      },
+    },
+  })) as ExtendedSub[];
 
   return (
     <>
@@ -41,6 +57,13 @@ export default async function Home() {
             >
               Create Community
             </Link>
+          </dl>
+          <hr />
+          <dl className="mt-10">
+            <h1 className="font-bold text-3xl md:text-4xl pl-3 mb-3">
+              Explore{" "}
+            </h1>
+            <SubFeed subreddits={subs} />
           </dl>
         </div>
       </div>
