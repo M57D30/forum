@@ -39,7 +39,7 @@ const CustomFeed = async () => {
     take: INFINITE_SCROLL_PAGINATION_RESULTS,
   });
 
-  return <PostFeed initialPosts={posts} subredditId={posts[0].subredditId} />;
+  return <PostFeed initialPosts={posts} subredditId={""} />;
 };
 
 export default CustomFeed;
